@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ethiopian University & Field Finder</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+      :root {
+        --primary-color: #6c63ff;
+        --secondary-color: #ff6584;
+        --tertiary-color: #4caf50;
+        --background-color: #0f172a;
+        --text-color: #e2e8f0;
+        --card-color: #1e293b;
+      }
+      body {
+        font-family: "Raleway", sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--background-color);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(108, 99, 255, 0.1) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(255, 101, 132, 0.1) 0%,
+            transparent 20%
+          );
+        background-attachment: fixed;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        flex-grow: 1;
+      }
+      header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        text-align: center;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.05) 25%,
+          transparent 50%
+        );
+        transform: rotate(30deg);
+        animation: shimmer 10s linear infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateY(-50%) rotate(0deg);
+        }
+        100% {
+          transform: translateY(50%) rotate(360deg);
+        }
+      }
+      h1 {
+        margin: 0;
+        font-size: 3rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      .tagline {
+        font-size: 1.4rem;
+        opacity: 0.9;
+        margin-top: 1rem;
+        font-weight: 300;
+      }
+      #preference-form,
+      #results {
+        background-color: var(--card-color);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      #preference-form::before,
+      #results::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.03) 0%,
+          rgba(255, 255, 255, 0.01) 25%,
+          transparent 50%
+        );
+        transform: rotate(30deg);
+        pointer-events: none;
+      }
+      #preference-form:hover,
+      #results:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+      .preference-question {
+        margin-bottom: 2rem;
+      }
+      .preference-options {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 6px rgba(108, 99, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      button::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0.1) 25%,
+          transparent 50%
+        );
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+      }
+      button:hover::before {
+        transform: translateY(50%) rotate(30deg);
+      }
+      button:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(255, 101, 132, 0.3);
+      }
+      .recommendation {
+        background-color: var(--card-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .recommendation:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+      .recommendation h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+      }
+      .match-score {
+        font-weight: bold;
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+      }
+      .fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1rem;
+      }
+      .field {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+      .field:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+      #recommendationChart,
+      #fieldTreemap {
+        margin-bottom: 2rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 1rem;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+      .progress {
+        width: 0;
+        height: 100%;
+        background-color: var(--tertiary-color);
+        transition: width 0.5s ease;
+      }
+      #fieldTreemap {
+        width: 100%;
+        height: 400px;
+      }
+      .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      #backButton {
+        background-color: #4a5568;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 6px rgba(74, 85, 104, 0.2);
+      }
+      #backButton:hover {
+        background-color: #2d3748;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(74, 85, 104, 0.3);
+      }
+      #restartButton {
+        background-color: var(--secondary-color);
+      }
+      footer {
+        background-color: var(--card-color);
+        color: var(--text-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-top: 2rem;
+      }
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .footer-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+      .footer-links {
+        display: flex;
+        gap: 1.5rem;
+      }
+      .footer-links a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      .footer-links a:hover {
+        color: var(--primary-color);
+      }
+      .footer-info {
+        width: 100%;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+      .best-match {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: var(--primary-color);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.5s ease;
+      }
+      .best-match.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .best-match h3 {
+        margin-top: 0;
+        font-size: 1.8rem;
+      }
+      .best-match p {
+        margin-bottom: 1.5rem;
+      }
+      .best-match button {
+        background-color: white;
+        color: var(--primary-color);
+      }
+      .campus {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+      .campus h4 {
+        margin-top: 0;
+        color: var(--secondary-color);
+      }
+      .campus ul {
+        padding-left: 1.5rem;
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Ethiopian University & Field Finder</h1>
+      <p class="tagline">Discover Your Perfect Academic Path in Ethiopia</p>
+    </header>
+
+    <div class="container">
+      <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      <div id="preference-form">
+        <h2>Your Preferences</h2>
+        <!-- Preference questions will be dynamically added here -->
+      </div>
+
+      <div id="results" style="display: none">
+        <h2>Your Personalized Recommendations</h2>
+        <canvas id="recommendationChart"></canvas>
+        <div id="fieldTreemap"></div>
+        <div id="recommendations"></div>
+        <button id="restartButton" onclick="restartQuiz()">Start Over</button>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-logo">Ethiopian University & Field Finder</div>
+        <div class="footer-links">
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms of Service</a>
+        </div>
+        <div class="footer-info">
+          <p>
+            © 2024 Ethiopian University & Field Finder. All rights reserved.
+          </p>
+          <p>
+            Developed by Leul Tewodros Agonafer | Empowering Ethiopian students
+            to make informed decisions about their higher education.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <div class="best-match" id="bestMatch">
+      <h3>Best Match Found!</h3>
+      <p>
+        We've identified an outstanding opportunity that aligns perfectly with
+        your preferences.
+      </p>
+      <button onclick="closeBestMatch()">View Recommendation</button>
+    </div>
+
+    <script>
+const preferences = [
+    { key: 'field_interest', question: 'What field are you most interested in?', options: ['Science & Technology', 'Business & Economics', 'Social Sciences & Humanities', 'Health Sciences', 'Arts & Design', 'Agriculture & Environmental Sciences', 'Aviation', 'Dentistry', 'Medicine'] },
+    { key: 'university_type', question: 'What type of university do you prefer?', options: ['Public', 'Private', 'No Preference'] },
+    { key: 'campus_size', question: 'What campus size do you prefer?', options: ['Large', 'Medium', 'Small', 'No Preference'] },
+    { key: 'research_focus', question: 'How important is research to you?', options: ['Very Important', 'Somewhat Important', 'Not Important'] },
+    { key: 'location', question: 'What location do you prefer?', options: ['Addis Ababa', 'Other Urban Areas', 'Rural Areas', 'No Preference'] },
+    { key: 'internship_opportunities', question: 'How important are internship opportunities?', options: ['Very Important', 'Somewhat Important', 'Not Important'] },
+    { key: 'international_programs', question: 'Are you interested in international exchange programs?', options: ['Yes', 'No', 'Maybe'] },
+    { key: 'study_preference', question: 'Do you prefer theoretical or practical learning?', options: ['Mostly Theoretical', 'Balanced', 'Mostly Practical'] },
+    { key: 'career_goal', question: 'What is your primary career goal?', options: ['Research & Academia', 'Industry Professional', 'Entrepreneur', 'Public Service', 'NGO / Development Work', 'Aviation Industry', 'Healthcare Professional', 'Dentist', 'Artist/Designer', 'Medical Doctor', 'Undecided'] },
+    { key: 'subject_strength', question: 'In which subject area do you excel the most?', options: ['Mathematics', 'Language & Literature', 'Natural Sciences', 'Social Studies', 'Arts', 'Technical Skills', 'Biology', 'Physics', 'Chemistry', 'Dentistry'] },
+    { key: 'work_environment', question: 'What kind of work environment do you envision for your future career?', options: ['Office Setting', 'Laboratory', 'Fieldwork', 'Creative Studio', 'Community-based', 'Aviation', 'Hospital/Clinic', 'Dental Clinic', 'Varied Environments'] },
+    { key: 'technology_interest', question: 'How interested are you in working with cutting-edge technology?', options: ['Very Interested', 'Somewhat Interested', 'Not Particularly Interested'] },
+    { key: 'social_impact', question: 'How important is making a direct social impact through your work?', options: ['Extremely Important', 'Somewhat Important', 'Not a Priority'] },
+    { key: 'communication_skills', question: 'How would you rate your communication and interpersonal skills?', options: ['Excellent', 'Good', 'Average', 'Need Improvement'] },
+    { key: 'problem_solving', question: 'Do you enjoy solving complex problems?', options: ['Yes, Very Much', 'Sometimes', 'Not Really'] },
+    { key: 'language_preference', question: 'What is your preferred language of instruction?', options: ['English', 'Amharic', 'Bilingual', 'Other'] },
+    { key: 'cost_sensitivity', question: 'How important is the cost of education to you?', options: ['Very Important', 'Somewhat Important', 'Not a Major Factor'] },
+    { key: 'extracurricular_activities', question: 'How important are extracurricular activities and student life?', options: ['Very Important', 'Somewhat Important', 'Not Important'] }
+  ];
+
+  let currentPreferenceIndex = 0;
+  let userAnswers = {};
+
+  function updateProgressBar() {
+    const progress = (currentPreferenceIndex / preferences.length) * 100;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+  }
+
+  function askNextPreference() {
+    const preferenceForm = document.getElementById('preference-form');
+    if (currentPreferenceIndex < preferences.length) {
+      const preference = preferences[currentPreferenceIndex];
+      const questionHtml = `
+        <div class="preference-question">
+          <p>${preference.question}</p>
+          <div class="preference-options">
+            ${preference.options.map(option => `<button onclick="answerPreference('${option}')">${option}</button>`).join('')}
+          </div>
+        </div>
+        <div class="navigation-buttons">
+          ${currentPreferenceIndex > 0 ? '<button id="backButton" onclick="goBack()">Back</button>' : ''}
+        </div>
+      `;
+      preferenceForm.innerHTML = questionHtml;
+      updateProgressBar();
+    } else {
+      getRecommendations();
+    }
+  }
+
+  function answerPreference(answer) {
+    userAnswers[preferences[currentPreferenceIndex].key] = answer;
+    currentPreferenceIndex++;
+    askNextPreference();
+  }
+
+  function goBack() {
+    if (currentPreferenceIndex > 0) {
+      currentPreferenceIndex--;
+      askNextPreference();
+    }
+  }
+
+      function getRecommendations() {
+          const universities = [
+    {
+        name: 'Addis Ababa University',
+        type: 'Public',
+        size: 'Large',
+        location: 'Addis Ababa',
+        researchFocus: 'Very High',
+        internships: 'Many',
+        internationalPrograms: 'Yes',
+        studyApproach: 'Balanced',
+        fields: ['Science & Technology', 'Business & Economics', 'Social Sciences & Humanities', 'Health Sciences'],
+        careerOutlooks: ['Research & Academia', 'Industry Professional', 'Public Service'],
+        technologyFocus: 'High',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'College of Health Sciences (Tikur Anbessa Campus)',
+                majors: ['Medicine', 'Nursing', 'Pharmacy', 'Public Health']
+            },
+            {
+                name: 'Addis Ababa Institute of Technology (AAiT)',
+                majors: ['Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Chemical Engineering', 'Computer Science']
+            },
+            {
+                name: 'Ethiopian Institute of Architecture, Building Construction and City Development (EiABC)',
+                majors: ['Architecture', 'Urban Planning', 'Construction Management']
+            },
+            {
+                name: 'School of Commerce Campus',
+                majors: ['Business', 'Marketing', 'International Trade', 'Finance']
+            },
+            {
+                name: 'Science Campus (Arat Kilo)',
+                majors: ['Biology', 'Chemistry', 'Physics', 'Mathematics', 'Geology']
+            },
+            {
+                name: 'Social Science Campus (Sidist Kilo)',
+                majors: ['Sociology', 'Anthropology', 'Geography', 'History']
+            },
+            {
+                name: 'College of Development Studies (Lideta Campus)',
+                majors: ['Development Studies', 'Agricultural Economics', 'Rural Development']
+            }
+        ]
+    },
+    {
+        name: 'HiLCoE School of Computer Science and Technology',
+        type: 'Private',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Practical',
+        fields: ['Science & Technology'],
+        careerOutlooks: ['Industry Professional', 'Entrepreneur'],
+        technologyFocus: 'Very High',
+        socialImpact: 'Medium',
+        costLevel: 'High',
+        extracurriculars: 'Some',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Computer Science', 'Software Engineering', 'Information Systems', 'Cybersecurity', 'Data Science']
+            }
+        ]
+    },
+    {
+        name: 'Unity University',
+        type: 'Private',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'Medium',
+        internships: 'Some',
+        internationalPrograms: 'Some',
+        studyApproach: 'Balanced',
+        fields: ['Business & Economics', 'Social Sciences & Humanities', 'Science & Technology'],
+        careerOutlooks: ['Industry Professional', 'Entrepreneur'],
+        technologyFocus: 'Medium',
+        socialImpact: 'Medium',
+        costLevel: 'Medium',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Business Administration', 'Law', 'Engineering']
+            },
+            {
+                name: 'Gerji Campus',
+                majors: ['Information Technology', 'Social Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Addis Ababa Science and Technology University',
+        type: 'Public',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Practical',
+        fields: ['Science & Technology', 'Agriculture & Environmental Sciences'],
+        careerOutlooks: ['Industry Professional', 'Research & Academia'],
+        technologyFocus: 'Very High',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Some',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Engineering', 'Computer Science', 'Environmental Sciences', 'Applied Mathematics', 'Biotechnology']
+            }
+        ]
+    },
+    {
+        name: 'St. Paul\'s Hospital Millennium Medical College',
+        type: 'Public',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Practical',
+        fields: ['Health Sciences'],
+        careerOutlooks: ['Healthcare Professional', 'Research & Academia'],
+        technologyFocus: 'High',
+        socialImpact: 'Very High',
+        costLevel: 'Low',
+        extracurriculars: 'Some',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Medicine', 'Public Health', 'Nursing', 'Pharmacy', 'Medical Laboratory Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Rift Valley University',
+        type: 'Private',
+        size: 'Large',
+        location: 'Multiple Cities',
+        researchFocus: 'Low',
+        internships: 'Some',
+        internationalPrograms: 'Few',
+        studyApproach: 'Balanced',
+        fields: ['Business & Economics', 'Social Sciences & Humanities', 'Health Sciences'],
+        careerOutlooks: ['Industry Professional', 'Entrepreneur'],
+        technologyFocus: 'Medium',
+        socialImpact: 'Medium',
+        costLevel: 'Medium',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Addis Ababa Main Campus',
+                majors: ['Business', 'Information Technology']
+            },
+            {
+                name: 'Adama Campus',
+                majors: ['Health Sciences', 'Social Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Admas University',
+        type: 'Private',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'Low',
+        internships: 'Many',
+        internationalPrograms: 'Few',
+        studyApproach: 'Practical',
+        fields: ['Business & Economics', 'Science & Technology'],
+        careerOutlooks: ['Industry Professional', 'Entrepreneur'],
+        technologyFocus: 'Medium',
+        socialImpact: 'Low',
+        costLevel: 'Medium',
+        extracurriculars: 'Some',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Accounting', 'Management', 'Computer Science', 'Economics', 'Marketing']
+            }
+        ]
+    },
+    {
+        name: 'Debre Berhan University',
+        type: 'Public',
+        size: 'Medium',
+        location: 'Other Urban Areas',
+        researchFocus: 'Medium',
+        internships: 'Some',
+        internationalPrograms: 'Few',
+        studyApproach: 'Balanced',
+        fields: ['Agriculture & Environmental Sciences', 'Business & Economics', 'Science & Technology', 'Health Sciences'],
+        careerOutlooks: ['Industry Professional', 'Research & Academia', 'Public Service'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Agriculture', 'Business Administration', 'Engineering', 'Health Sciences', 'Natural Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Dental College of Ethiopia',
+        type: 'Public',
+        size: 'Small',
+        location: 'Addis Ababa',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Practical',
+        fields: ['Dentistry'],
+        careerOutlooks: ['Dentist'],
+        technologyFocus: 'High',
+        socialImpact: 'High',
+        costLevel: 'Medium',
+        extracurriculars: 'Few',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['General Dentistry', 'Orthodontics', 'Oral Surgery']
+            }
+        ]
+    },
+    {
+        name: 'Ethiopian Academy of Arts',
+        type: 'Private',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'Medium',
+        internships: 'Some',
+        internationalPrograms: 'Many',
+        studyApproach: 'Balanced',
+        fields: ['Arts & Design'],
+        careerOutlooks: ['Artist/Designer'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'High',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Artistic Campus',
+                majors: ['Fine Arts', 'Graphic Design', 'Fashion Design']
+            }
+        ]
+    },
+    {
+        name: 'Medical School of Ethiopia',
+        type: 'Public',
+        size: 'Large',
+        location: 'Addis Ababa',
+        researchFocus: 'Very High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Practical',
+        fields: ['Medicine'],
+        careerOutlooks: ['Medical Doctor'],
+        technologyFocus: 'High',
+        socialImpact: 'Very High',
+        costLevel: 'Low',
+        extracurriculars: 'Few',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['General Medicine', 'Surgery', 'Pediatrics', 'Internal Medicine']
+            }
+        ]
+    },
+    {
+        name: 'Ethiopian Aviation Academy',
+        type: 'Public',
+        size: 'Small',
+        location: 'Addis Ababa',
+        researchFocus: 'Low',
+        internships: 'Many',
+        internationalPrograms: 'Many',
+        studyApproach: 'Very Practical',
+        fields: ['Aviation'],
+        careerOutlooks: ['Aviation Industry'],
+        technologyFocus: 'Very High',
+        socialImpact: 'Medium',
+        costLevel: 'High',
+        extracurriculars: 'Few',
+        campuses: [
+            {
+                name: 'Bole International Airport Campus',
+                majors: ['Pilot Training', 'Aircraft Maintenance', 'Cabin Crew Training', 'Aviation Management']
+            }
+        ]
+    },
+    {
+        name: 'Kotebe Metropolitan University',
+        type: 'Public',
+        size: 'Medium',
+        location: 'Addis Ababa',
+        researchFocus: 'Medium',
+        internships: 'Some',
+        internationalPrograms: 'Few',
+        studyApproach: 'Balanced',
+        fields: ['Education', 'Social Sciences'],
+        careerOutlooks: ['Teaching', 'Public Service'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Some',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Teacher Education', 'Educational Planning', 'Sociology', 'Psychology']
+            }
+        ]
+    },
+    {
+        name: 'Mekelle University',
+        type: 'Public',
+        size: 'Large',
+        location: 'Mekelle',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Balanced',
+        fields: ['Agriculture & Environmental Sciences', 'Business & Economics', 'Social Sciences & Humanities', 'Science & Technology', 'Health Sciences'],
+        careerOutlooks: ['Research & Academia', 'Industry Professional', 'Public Service'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Agriculture', 'Engineering', 'Health Sciences', 'Business', 'Social Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Hawassa University',
+        type: 'Public',
+        size: 'Large',
+        location: 'Hawassa',
+        researchFocus: 'High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Balanced',
+        fields: ['Agriculture & Environmental Sciences', 'Business & Economics', 'Social Sciences & Humanities', 'Science & Technology', 'Health Sciences'],
+        careerOutlooks: ['Research & Academia', 'Industry Professional', 'Public Service'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Agriculture', 'Business', 'Engineering', 'Health Sciences', 'Social Sciences']
+            }
+        ]
+    },
+    {
+        name: 'Jimma University',
+        type: 'Public',
+        size: 'Large',
+        location: 'Jimma',
+        researchFocus: 'Very High',
+        internships: 'Many',
+        internationalPrograms: 'Some',
+        studyApproach: 'Balanced',
+        fields: ['Agriculture & Environmental Sciences', 'Business & Economics', 'Social Sciences & Humanities', 'Science & Technology', 'Health Sciences'],
+        careerOutlooks: ['Research & Academia', 'Industry Professional', 'Public Service'],
+        technologyFocus: 'Medium',
+        socialImpact: 'High',
+        costLevel: 'Low',
+        extracurriculars: 'Many',
+        campuses: [
+            {
+                name: 'Main Campus',
+                majors: ['Agriculture', 'Business', 'Engineering', 'Health Sciences', 'Social Sciences']
+            }
+        ]
+    }
+];
+
+// Step 1: Calculate the score for each university
+const universitiesWithScores = universities.map(uni => {
+    let score = 0;
+
+    // Field Interest
+    if (uni.fields.includes(userAnswers.field_interest)) score += 2;
+
+    // University Type
+    if (userAnswers.university_type === 'No Preference' || uni.type === userAnswers.university_type) score += 1;
+
+    // Campus Size
+    if (userAnswers.campus_size === 'No Preference' || uni.size === userAnswers.campus_size) score += 1;
+
+    // Research Focus
+    if (userAnswers.research_focus === 'Very Important' && uni.researchFocus === 'High') score += 1;
+    if (userAnswers.research_focus === 'Somewhat Important' && uni.researchFocus === 'Medium') score += 1;
+
+    // Location
+    if (userAnswers.location === 'No Preference' || uni.location === userAnswers.location) score += 1;
+
+    // Internship Opportunities
+    if (userAnswers.internship_opportunities === 'Very Important' && uni.internships === 'Many') score += 1;
+
+    // International Programs
+    if (userAnswers.international_programs === 'Yes' && uni.internationalPrograms === 'Many') score += 1;
+
+    // Study Preference
+    if (userAnswers.study_preference === 'Balanced' && uni.studyApproach === 'Balanced') score += 1;
+    if (userAnswers.study_preference === 'Mostly Practical' && uni.studyApproach === 'Practical') score += 1;
+
+    // Career Goal
+    if (uni.careerOutlooks.includes(userAnswers.career_goal)) score += 1;
+
+    return { uni, score };
+});
+
+// Step 2: Filter universities with a score greater than half the maximum possible score
+const maxScore = 10; // Adjust based on criteria
+const minScoreThreshold = maxScore * 0.3; // At least 30% of the maximum score
+let relevantUniversities = universitiesWithScores.filter(item => item.score >= minScoreThreshold);
+
+// If no universities meet the threshold, include the ones with the highest scores regardless
+if (relevantUniversities.length === 0) {
+    relevantUniversities = universitiesWithScores.sort((a, b) => b.score - a.score).slice(0, 5);
+}
+
+// Step 3: Sort universities by score in descending order
+relevantUniversities.sort((a, b) => b.score - a.score);
+
+// Step 4: Take the top 5 matches
+const topMatches = relevantUniversities.slice(0, 5).map(item => item.uni);
+
+// Step 5: Display recommendations
+displayResults(topMatches);
+}
+
+      function displayResults(recommendations) {
+          const resultsDiv = document.getElementById('results');
+          resultsDiv.style.display = 'block';
+
+          // Create radar chart
+          const ctx = document.getElementById('recommendationChart').getContext('2d');
+          new Chart(ctx, {
+              type: 'radar',
+              data: {
+                  labels: recommendations.slice(0, 8).map(r => r.name),
+                  datasets: [{
+                      label: 'Match Confidence',
+                      data: recommendations.slice(0, 8).map((r, index) => (1 - index * 0.1).toFixed(2)),
+                      backgroundColor: 'rgba(108, 99, 255, 0.2)',
+                      borderColor: 'rgba(108, 99, 255, 1)',
+                      pointBackgroundColor: 'rgba(108, 99, 255, 1)',
+                      pointBorderColor: '#fff',
+                      pointHoverBackgroundColor: '#fff',
+                      pointHoverBorderColor: 'rgba(108, 99, 255, 1)'
+                  }]
+              },
+              options: {
+                  scales: {
+                      r: {
+                          angleLines: {
+                              color: 'rgba(255, 255, 255, 0.1)'
+                          },
+                          grid: {
+                              color: 'rgba(255, 255, 255, 0.1)'
+                          },
+                          pointLabels: {
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              font: {
+                                  size: 10
+                              }
+                          },
+                          ticks: {
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              backdropColor: 'transparent'
+                          },
+                          suggestedMin: 0,
+                          suggestedMax: 1
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          display: false
+                      }
+                  }
+              }
+          });
+
+          // Create treemap for fields using ECharts
+          const fieldCounts = {};
+          recommendations.forEach(r => {
+              r.fields.forEach(field => {
+                  if (fieldCounts[field]) {
+                      fieldCounts[field]++;
+                  } else {
+                      fieldCounts[field] = 1;
+                  }
+              });
+          });
+
+          const fieldData = Object.entries(fieldCounts).map(([field, count]) => ({
+              name: field,
+              value: count
+          }));
+
+          const fieldTreemap = echarts.init(document.getElementById('fieldTreemap'));
+          const fieldTreemapOption = {
+              series: [{
+                  type: 'treemap',
+                  data: fieldData,
+                  label: {
+                      show: true,
+                      formatter: '{b}',
+                      fontSize: 14,
+                      color: '#fff'
+                  },
+                  itemStyle: {
+                      borderColor: '#fff'
+                  },
+                  levels: [
+                      {
+                          itemStyle: {
+                              borderWidth: 0,
+                              gapWidth: 1
+                          }
+                      },
+                      {
+                          itemStyle: {
+                              borderWidth: 5,
+                              gapWidth: 1,
+                              borderColor: '#ffffff'
+                          }
+                      },
+                      {
+                          colorSaturation: [0.35, 0.5],
+                          itemStyle: {
+                              borderWidth: 5,
+                              gapWidth: 1,
+                              borderColorSaturation: 0.6
+                          }
+                      }
+                  ]
+              }]
+          };
+          fieldTreemap.setOption(fieldTreemapOption);
+
+          // Display university and field details
+          const recommendationsHtml = recommendations.map((r, index) => `
+              <div class="recommendation">
+                  <h3>${r.name}</h3>
+                  <p class="match-score">Match Confidence: ${((1 - index * 0.1) * 100).toFixed(1)}%</p>
+                  <p>Type: ${r.type}, Size: ${r.size}, Location: ${r.location}</p>
+                  <p>Research Focus: ${r.researchFocus}, Internships: ${r.internships}, International Programs: ${r.internationalPrograms}</p>
+                  <p>Study Approach: ${r.studyApproach}, Technology Focus: ${r.technologyFocus}, Social Impact: ${r.socialImpact}</p>
+                  <p>Cost Level: ${r.costLevel}, Extracurricular Activities: ${r.extracurriculars}</p>
+                  <div class="fields">
+                      ${r.fields.map(field => `<span class="field">${field}</span>`).join('')}
+                  </div>
+                  ${r.campuses.map(campus => `
+                      <div class="campus">
+                          <h4>${campus.name}</h4>
+                          <ul>
+                              ${campus.majors.map(major => `<li>${major}</li>`).join('')}
+                          </ul>
+                      </div>
+                  `).join('')}
+              </div>
+          `).join('');
+
+          document.getElementById('recommendations').innerHTML = recommendationsHtml;
+          document.getElementById('preference-form').style.display = 'none';
+
+          // Show best match animation
+          setTimeout(() => {
+              document.getElementById('bestMatch').classList.add('show');
+          }, 1000);
+      }
+
+      function closeBestMatch() {
+          document.getElementById('bestMatch').classList.remove('show');
+      }
+
+      function restartQuiz() {
+          window.location.reload();
+      }
+
+      // Initialize the quiz
+      askNextPreference();
+
+      // Add event listener for window resize to update the treemap
+      window.addEventListener('resize', function() {
+          if (fieldTreemap) {
+              fieldTreemap.resize();
+          }
+      });
+  </script>
+  </body>
+</html>
